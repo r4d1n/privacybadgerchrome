@@ -209,14 +209,9 @@ var Utils = exports.Utils = {
    * @param {String} origin The origin to disable the PB for
    **/
   disablePrivacyBadgerForOrigin: function(origin){
-    if(localStorage.disabledSites === undefined){
-      localStorage.disabledSites = JSON.stringify([origin]);
-      return;
-    }
-    var disabledSites = JSON.parse(localStorage.disabledSites);
-    if(disabledSites.indexOf(origin) < 0){
-      disabledSites.push(origin);
-      localStorage.disabledSites = JSON.stringify(disabledSites);
+    if(!Utils.disabledSites[origin]){
+      Utils.disabledSites[origin] = true;
+      Utils.setDisabledSites();
     }
   },
 
@@ -226,14 +221,9 @@ var Utils = exports.Utils = {
    * @param {String} origin The origin to disable the PB for
    **/
   enablePrivacyBadgerForOrigin: function(origin){
-    if(localStorage.disabledSites === undefined){
-      return;
-    }
-    var disabledSites = JSON.parse(localStorage.disabledSites);
-    var idx = disabledSites.indexOf(origin);
-    if(idx >= 0){
-      Utils.removeElementFromArray(disabledSites, idx);
-      localStorage.disabledSites = JSON.stringify(disabledSites);
+    if(Utils.disabledSites[origin]){
+      Utils.disabledSites[origin] = false;
+      Utils.setDisabledSites();
     }
   },
 
@@ -343,13 +333,24 @@ var Utils = exports.Utils = {
   },
 
   /**
-   * Get disabledSites data from local Storage, make globally accessible in memory
+   * Get and set disabledSites data between local Storage and in-memory object
    */
 
   disabledSites: {},
 
   loadDisabledSites: function() {
     Utils.disabledSites = JSON.parse(localStorage.getItem("disabledSites")) || {};
+    return Utils.disabledSites;
+  },
+
+  setDisabledSites: function() {
+    // filter out newly falsey values
+    var disabledKeys = Object.keys(Utils.disabledSites);
+    Utils.disabledSites = Array.prototype.filter.call(disabledKeys, function(el) {
+      return Boolean(el);
+    })
+    // write to localStorage and return in-memory object
+    localStorage.setItem("disabledSites", JSON.stringify(Utils.disabledSites))
     return Utils.disabledSites;
   }
 
