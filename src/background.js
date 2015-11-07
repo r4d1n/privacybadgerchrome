@@ -1,7 +1,7 @@
 /*
  * This file is part of Privacy Badger <https://www.eff.org/privacybadger>
  * Copyright (C) 2014 Electronic Frontier Foundation
- * Derived from Adblock Plus 
+ * Derived from Adblock Plus
  * Copyright (C) 2006-2013 Eyeo GmbH
  *
  * Privacy Badger is free software: you can redistribute it and/or modify
@@ -77,6 +77,9 @@ if (!("whitelistUrl" in localStorage)){
 var whitelistUrl = localStorage.whitelistUrl;
 var isFirstRun = false;
 var seenDataCorruption = false;
+
+// Init disabled site list
+if (!Object.keys(Utils.disabledSites).length) Utils.loadDisabledSites();
 
 require("filterNotifier").FilterNotifier.addListener(function(action) {
   // Called from lib/adblockplus.js after all filters have been created from subscriptions.
@@ -315,7 +318,7 @@ function addSubscription(prevVersion) {
   var userGreen = new SpecialSubscription("userGreen", "userGreen");
   FilterStorage.addSubscription(userGreen);
 
-  // Add a permanent store for seen third parties 
+  // Add a permanent store for seen third parties
   // TODO: Does this go away when the extension is updated?
   var seenThird = JSON.parse(localStorage.getItem("seenThirdParties"));
   if (!seenThird){
@@ -328,8 +331,8 @@ function addSubscription(prevVersion) {
     localStorage.setItem("supercookieDomains", JSON.stringify({}));
   }
 
-  // Add a permanent store for blocked domains to recheck DNT compliance 
-  // TODO: storing this in localStorage makes it synchronous, but we might 
+  // Add a permanent store for blocked domains to recheck DNT compliance
+  // TODO: storing this in localStorage makes it synchronous, but we might
   // want the speed up of async later if we want to deal with promises
   var blockedDomains = JSON.parse(localStorage.getItem("blockeddomainslist"));
   if (!blockedDomains){
@@ -714,7 +717,7 @@ function saveAction(userAction, origin, target) {
     FilterStorage.addFilter(filter, FilterStorage.knownSubscriptions[allUserActions[userAction]]);
     console.log("Finished saving action " + userAction + " for " + origin + "on" + target);
     return true;
-  } 
+  }
 
   // If there is no target proceed as normal
   for (var action in allUserActions) {
@@ -805,7 +808,7 @@ function setTrackingFlag(tabId,fqdn){
 }
 
 function originHasTracking(tabId,fqdn){
-  return tabData[tabId] && 
+  return tabData[tabId] &&
     tabData[tabId].trackers &&
     !!tabData[tabId].trackers[fqdn];
 }
@@ -877,7 +880,7 @@ chrome.webRequest.onBeforeRequest.addListener(updateCount, {urls: ["http://*/*",
 
 
 /**
-* Populate tabs object with currently open tabs when extension is updated or installed. 
+* Populate tabs object with currently open tabs when extension is updated or installed.
 */
 function updateTabList(){
   console.log('update tabs!');
@@ -907,7 +910,7 @@ function updateTabList(){
 /**
  * Decide what the action would presumably be for an origin
  * used to determine where the slider should go when the undo button
- * is clicked. 
+ * is clicked.
  *
  * @param string origin the domain to guess the action for
  */

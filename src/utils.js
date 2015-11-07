@@ -1,7 +1,7 @@
 /*
  * This file is part of Privacy Badger <https://www.eff.org/privacybadger>
  * Copyright (C) 2014 Electronic Frontier Foundation
- * Derived from Adblock Plus 
+ * Derived from Adblock Plus
  * Copyright (C) 2006-2013 Eyeo GmbH
  *
  * Privacy Badger is free software: you can redistribute it and/or modify
@@ -34,7 +34,7 @@
  * along with Adblock Plus.  If not, see <http://www.gnu.org/licenses/>.
  */
 require.scopes["utils"] = (function() {
-  
+
 var exports = {};
 var Utils = exports.Utils = {
   systemPrincipal: null,
@@ -187,10 +187,10 @@ var Utils = exports.Utils = {
    * @returns {Boolean} true if disabled
    **/
   isPrivacyBadgerEnabled: function(origin){
-    if(localStorage.disabledSites && JSON.parse(localStorage.disabledSites).length > 0){
-      var sites = JSON.parse(localStorage.disabledSites);
-      for(var i = 0; i < sites.length; i++){
-        if(sites[i] === origin){ return false; }
+    var sites = Utils.disabledSites;
+    if(sites && Object.keys(sites).length){
+      for(var key in sites) {
+        if(sites[key] === origin){ return false; }
       }
     }
     return true;
@@ -340,7 +340,19 @@ var Utils = exports.Utils = {
    */
   getSupercookieDomains: function() {
     return JSON.parse(localStorage.getItem("supercookieDomains")) || {};
+  },
+
+  /**
+   * Get disabledSites data from local Storage, make globally accessible in memory
+   */
+
+  disabledSites: {},
+
+  loadDisabledSites: function() {
+    Utils.disabledSites = JSON.parse(localStorage.getItem("disabledSites")) || {};
+    return Utils.disabledSites;
   }
+
 
 };
 
