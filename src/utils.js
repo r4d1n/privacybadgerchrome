@@ -33,7 +33,11 @@
  * You should have received a copy of the GNU General Public License
  * along with Adblock Plus.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 require.scopes["utils"] = (function() {
+var disabledSites = require("disabledSites");
+
+console.log('$$$disabledSites module in Utils', disabledSites);
 
 var exports = {};
 var Utils = exports.Utils = {
@@ -187,11 +191,11 @@ var Utils = exports.Utils = {
    * @returns {Boolean} true if disabled
    **/
   isPrivacyBadgerEnabled: function(origin){
-    var sites = Utils.disabledSites;
+    var sites = disabledSites.getDisabledSites();
+    console.log('is enabled?', sites);
     if(sites && Object.keys(sites).length){
-      for(var key in sites) {
-        if(sites[key] === origin){ return false; }
-      }
+      // if site in object == true, PB is NOT enabled
+      return !Boolean(sites[origin]);
     }
     return true;
   },
@@ -208,12 +212,12 @@ var Utils = exports.Utils = {
    *
    * @param {String} origin The origin to disable the PB for
    **/
-  disablePrivacyBadgerForOrigin: function(origin){
-    if(!Utils.disabledSites[origin]){
-      Utils.disabledSites[origin] = true;
-      Utils.setDisabledSites();
-    }
-  },
+   disablePrivacyBadgerForOrigin: function(origin){
+     console.log('before disable', disabledSites.getDisabledSites())
+     disabledSites.addDisabledSite(origin);
+     disabledSites.writeDisabledSites();
+     console.log('after disable', Utils.disabledSites)
+   },
 
   /**
    * remove an origin from the disabledSites list
@@ -221,10 +225,10 @@ var Utils = exports.Utils = {
    * @param {String} origin The origin to disable the PB for
    **/
   enablePrivacyBadgerForOrigin: function(origin){
-    if(Utils.disabledSites[origin]){
-      Utils.disabledSites[origin] = false;
-      Utils.setDisabledSites();
-    }
+    console.log('!!! before enable', disabledSites.getDisabledSites())
+    disabledSites.removeDisabledSite(origin);
+    disabledSites.writeDisabledSites();
+    console.log('@@@ enabled', disabledSites.getDisabledSites())
   },
 
   /**
@@ -330,30 +334,7 @@ var Utils = exports.Utils = {
    */
   getSupercookieDomains: function() {
     return JSON.parse(localStorage.getItem("supercookieDomains")) || {};
-  },
-
-  /**
-   * Get and set disabledSites data between local Storage and in-memory object
-   */
-
-  disabledSites: {},
-
-  loadDisabledSites: function() {
-    Utils.disabledSites = JSON.parse(localStorage.getItem("disabledSites")) || {};
-    return Utils.disabledSites;
-  },
-
-  setDisabledSites: function() {
-    // filter out newly falsey values
-    var disabledKeys = Object.keys(Utils.disabledSites);
-    Utils.disabledSites = Array.prototype.filter.call(disabledKeys, function(el) {
-      return Boolean(el);
-    })
-    // write to localStorage and return in-memory object
-    localStorage.setItem("disabledSites", JSON.stringify(Utils.disabledSites))
-    return Utils.disabledSites;
   }
-
 
 };
 

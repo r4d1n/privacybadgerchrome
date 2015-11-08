@@ -61,6 +61,7 @@ var BlockedDomainList = require("blockedDomainList").BlockedDomainList;
 var DomainExceptions = require("domainExceptions").DomainExceptions;
 var HeuristicBlocking = require("heuristicblocking");
 var SocialWidgetLoader = require("socialwidgetloader");
+var disabledSites = require("disabledSites");
 
 // Load social widgets
 var SocialWidgetList = SocialWidgetLoader.loadSocialWidgetsFromFile("src/socialwidgets.json");
@@ -79,7 +80,11 @@ var isFirstRun = false;
 var seenDataCorruption = false;
 
 // Init disabled site list
-if (!Object.keys(Utils.disabledSites).length) Utils.loadDisabledSites();
+if (!("disabledSites" in localStorage)){
+  disabledSites.writeDisabledSites();
+} else {
+  disabledSites.readDisabledSites();
+}
 
 require("filterNotifier").FilterNotifier.addListener(function(action) {
   // Called from lib/adblockplus.js after all filters have been created from subscriptions.
